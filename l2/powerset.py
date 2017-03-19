@@ -40,21 +40,6 @@ def toBaseN(decimal, base):
         n = n // base
     return l
 
-def yieldAllCombos2(items):
-    N = len(items)
-    for i in range(3**N):
-        base3 = toBaseN(i, 3)
-        bag1, bag2 = [], []
-        counter = 0
-        for item in items:
-            if counter == len(base3):
-                break
-            elif base3[counter] == 1:
-                bag1.append(item)
-            elif base3[counter] == 2:
-                bag2.append(item)
-            counter += 1
-        yield (bag1, bag2)
 
 #
 #for combo in yieldAllCombos(['a', 'b']):
