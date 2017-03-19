@@ -12,7 +12,7 @@ def powerSet(items):
         
 #for combo in powerSet(['a','b','c']):
 #    print(combo)
-    
+
 def yieldAllCombos(items):
     """
         Generates all combinations of N items into two bags, whereby each 
@@ -31,6 +31,31 @@ def yieldAllCombos(items):
             elif (i // (3**j)) % 3 == 2:
                 combo[1].append(items[j])
         yield combo
+
+def toBaseN(decimal, base):
+    l = []
+    n = decimal
+    while n != 0:
+        l.append(n % base)
+        n = n // base
+    return l
+
+def yieldAllCombos2(items):
+    N = len(items)
+    for i in range(3**N):
+        base3 = toBaseN(i, 3)
+        bag1, bag2 = [], []
+        counter = 0
+        for item in items:
+            if counter == len(base3):
+                break
+            elif base3[counter] == 1:
+                bag1.append(item)
+            elif base3[counter] == 2:
+                bag2.append(item)
+            counter += 1
+        yield (bag1, bag2)
+
 #
 #for combo in yieldAllCombos(['a', 'b']):
 #    print(combo)
