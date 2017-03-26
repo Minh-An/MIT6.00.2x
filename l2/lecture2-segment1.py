@@ -78,10 +78,44 @@ def maxVal(toConsider, avail):
             result = (withoutVal, withoutToTake)
     return result
 
+def fastMaxVal(toConsider, avail, memo = {}):
+    if (len(toConsider), avail) in memo:
+        return memo[(len(toConsider), avail)]
+    elif toConsider == [] or avail == 0:
+        result = (0, ())
+    elif toConsider[0].getCost() > avail:
+        #Explore right branch only
+        result = fastMaxVal(toConsider[1:], avail, memo)
+    else:
+        nextItem = toConsider[0]
+        #Explore left branch
+        withVal, withToTake = fastMaxVal(toConsider[1:],
+                                     avail - nextItem.getCost(), memo)
+        withVal += nextItem.getValue()
+        #Explore right branch
+        withoutVal, withoutToTake = fastMaxVal(toConsider[1:], avail, memo)
+        #Choose better branch
+        if withVal > withoutVal:
+            result = (withVal, withToTake + (nextItem,))
+        else:
+            result = (withoutVal, withoutToTake)
+    memo[(len(toConsider), avail)] = result
+    return result
+    
+
 def testMaxVal(foods, maxUnits, printItems = True):
     print('Use search tree to allocate', maxUnits,
           'calories')
     val, taken = maxVal(foods, maxUnits)
+    print('Total value of items taken =', val)
+    if printItems:
+        for item in taken:
+            print('   ', item)
+            
+def testFastMaxVal(foods, maxUnits, printItems = True):
+    print('Use search tree to allocate', maxUnits,
+          'calories')
+    val, taken = fastMaxVal(foods, maxUnits)
     print('Total value of items taken =', val)
     if printItems:
         for item in taken:
@@ -95,6 +129,6 @@ foods = buildMenu(names, values, calories)
 
 testGreedys(foods, 750)
 print('')
-testMaxVal(foods, 750)
+testFastMaxVal(foods, 750)
 
 
