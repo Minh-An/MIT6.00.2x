@@ -17,6 +17,15 @@ class Edge(object):
     def __str__(self):
         return self.src.getName() + " -> " + self.dest.getName()
     
+class WeightedEdge(Edge):
+    def __init__(self, src, dest, weight):
+        Edge.__init__(self, src, dest)
+        self.weight = weight
+    def getWeight(self):
+        return self.weight
+    def __str__(self):
+        return Edge.__str__(self) + '(' + str(self.weight) + ')'
+    
 class Digraph(object):
     """edges is a dictionary that maps nodes to their children"""
     def __init__(self):
@@ -53,17 +62,38 @@ class Graph(Digraph):
         rev = Edge(edge.getDestination(), edge.getSource())
         Digraph.addEdge(self, rev)
         
-def DFS(graph, start, end, path, shortest):
+def buildCityGraph(graphType):
+    g = graphType()
+    for name in ('Boston', 'Providence', 'New York', 'Chicago',
+                 'Denver', 'Phoenix', 'Los Angeles'): #Create 7 nodes
+        g.addNode(Node(name))
+    g.addEdge(Edge(g.getNode('Boston'), g.getNode('Providence')))
+    g.addEdge(Edge(g.getNode('Boston'), g.getNode('New York')))
+    g.addEdge(Edge(g.getNode('Providence'), g.getNode('Boston')))
+    g.addEdge(Edge(g.getNode('Providence'), g.getNode('New York')))
+    g.addEdge(Edge(g.getNode('New York'), g.getNode('Chicago')))
+    g.addEdge(Edge(g.getNode('Chicago'), g.getNode('Phoenix')))
+    g.addEdge(Edge(g.getNode('Chicago'), g.getNode('Denver')))
+    g.addEdge(Edge(g.getNode('Denver'), g.getNode('Phoenix')))
+    g.addEdge(Edge(g.getNode('Denver'), g.getNode('New York')))
+    g.addEdge(Edge(g.getNode('Los Angeles'), g.getNode('Boston')))
+    return g
+        
+def DFS(graph, start, end, path, shortest, toPrint = False):
     """Find the shortest path from the start node to the end node using deep first search"""
     path = path + [start]
+    if toPrint:
+        print('Current DFS path:', printPath(path))
     if start == end:
         return path
     for node in graph.childrenOf(start):
         if node not in path: 
             if shortest == None or len(path) < len(shortest):
-                newPath = DFS(graph, node, end, path, shortest)
+                newPath = DFS(graph, node, end, path, shortest, toPrint)
                 if newPath != None:
                     shortest = newPath
+        elif toPrint:
+            print('Already visited', node)
     return shortest
 
 def printPath(path):
@@ -75,29 +105,53 @@ def printPath(path):
             result += '->'
     return result
 
+def shortestPath(graph, start, end, toPrint = False):
+    return DFS(graph, start, end, [], None, toPrint)
+
+def testSP(source, destination):
+    g = buildCityGraph(Digraph)
+    sp = shortestPath(g, g.getNode(source), g.getNode(destination),
+                      toPrint = True)
+    if sp != None:
+        print('Shortest path from', source, 'to',
+              destination, 'is', printPath(sp))
+    else:
+        print('There is no path from', source, 'to', destination)
+
+#testSP('Chicago', 'Boston')
+#testSP('Boston', 'Phoenix')
+
 def BFS(graph, start, end, toPrint = False):
-    initPath = [start]
-    pathQueue = [initPath]
-    if toPrint:
-        print('Current BFS path:', printPat)
+    pathQueue = [[start]]
+    while len(pathQueue) != 0:
+        path = (pathQueue.pop(0))
+        lastNode = path[-1]
+        if lastNode == end:
+            return path
+        for n in graph.childrenOf(lastNode):
+            if n not in path:
+                pathQueue.append(path+[n])
+    return None
+
+nodes = []
+nodes.append(Node("ABC")) # nodes[0]
+nodes.append(Node("ACB")) # nodes[1]
+nodes.append(Node("BAC")) # nodes[2]
+nodes.append(Node("BCA")) # nodes[3]
+nodes.append(Node("CAB")) # nodes[4]
+nodes.append(Node("CBA")) # nodes[5]
+        
+g = Graph()
+for n in nodes:
+    g.addNode(n)
     
-def shortestPath(graph, start, end):
-    return DFS(graph, start, end, [], None)
+edges = []
+edges.append(WeightedEdge(nodes[0], nodes[1], 1))
+edges.append(WeightedEdge(nodes[0], nodes[2], 2))
+edges.append(WeightedEdge(nodes[1], nodes[4], 3))
+edges.append(WeightedEdge(nodes[2], nodes[3], 4))
+edges.append(WeightedEdge(nodes[3], nodes[5], 5))
+edges.append(WeightedEdge(nodes[4], nodes[5], 6))
 
-
-nodes = [Node('0'), Node('1'), Node('2'), Node('3')]
-
-graph = Digraph()
-graph.addNode(nodes[0])
-graph.addNode(nodes[1])
-graph.addNode(nodes[2])
-graph.addNode(nodes[3])
-
-graph.addEdge(Edge(nodes[0], nodes[1]))
-graph.addEdge(Edge(nodes[0], nodes[3]))
-graph.addEdge(Edge(nodes[1], nodes[2]))
-graph.addEdge(Edge(nodes[2], nodes[3]))
-
-path = shortestPath(graph, nodes[0], nodes[3])
-for node in path:
-    print(node)
+for e in edges:
+    print(e)
