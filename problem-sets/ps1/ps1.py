@@ -55,7 +55,20 @@ def greedy_cow_transport(cows,limit=10):
     trips
     """
     # TODO: Your code here
-    pass
+    result = []
+    cowsLeft = sorted(cows, key=cows.get, reverse=True)
+    #mutiple trips
+    while cowsLeft != []:
+        weightLeft = limit
+        trip = []
+        for i in range(len(cowsLeft)):
+            if cows[cowsLeft[i]] <= weightLeft: 
+                trip.append(cowsLeft[i])
+                weightLeft -= cows[cowsLeft[i]]
+        result.append(trip)
+        cowsLeft = [cow for cow in cowsLeft if cow not in trip]
+    return result
+            
 
 
 # Problem 2
@@ -80,7 +93,19 @@ def brute_force_cow_transport(cows,limit=10):
     trips
     """
     # TODO: Your code here
-    pass
+    shortest = None
+    for combo in get_partitions(cows.keys()):
+        overLimit = False
+        for trip in combo:
+            totalWeight = 0
+            for cow in trip:
+                totalWeight += cows[cow]
+            if totalWeight > limit:
+                overLimit = True
+        if not overLimit:
+            if shortest == None or len(combo) < len(shortest):
+                shortest = combo
+    return shortest
 
         
 # Problem 3
@@ -97,9 +122,19 @@ def compare_cow_transport_algorithms():
     Returns:
     Does not return anything.
     """
-    # TODO: Your code here
-    pass
-
+    cows = load_cows("ps1_cow_data.txt")
+    limit=10
+    print(cows)
+    print('Greedy Algorithm:')
+    start = time.time()
+    print(greedy_cow_transport(cows, limit))
+    end = time.time()
+    print('Time: ' + str(end - start))
+    print('Brute Force Algorithm:')
+    start = time.time()
+    print(brute_force_cow_transport(cows, limit))    
+    end = time.time()
+    print('Time: ' + str(end - start))
 
 """
 Here is some test data for you to see the results of your algorithms with. 
@@ -107,11 +142,8 @@ Do not submit this along with any of your answers. Uncomment the last two
 lines to print the result of your problem.
 """
 
-cows = load_cows("ps1_cow_data.txt")
-limit=100
-print(cows)
 
-print(greedy_cow_transport(cows, limit))
-print(brute_force_cow_transport(cows, limit))
+
+compare_cow_transport_algorithms()
 
 
