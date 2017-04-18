@@ -1,4 +1,4 @@
-import random, pylab
+import random, pylab, math
 
 #set line width
 pylab.rcParams['lines.linewidth'] = 4
@@ -79,7 +79,34 @@ class Drunk(object):
 
 class UsualDrunk(Drunk):
     def takeStep(self):
-        stepChoices = [(0,1), (0,-1), (1, 0), (-1, 0)]
+        stepChoices =\
+            [(0.0,1.0), (0.0,-1.0), (1.0, 0.0), (-1.0, 0.0)]
+        return random.choice(stepChoices)
+
+class ColdDrunk(Drunk):
+    def takeStep(self):
+        stepChoices =\
+            [(0.0,0.9), (0.0,-1.03), (1.03, 0.0), (-1.03, 0.0)]
+        return random.choice(stepChoices)
+
+class EDrunk(Drunk):
+    def takeStep(self):
+        ang = 2 * math.pi * random.random()
+        length = 0.5 + 0.5 * random.random()
+        return (length * math.sin(ang), length * math.cos(ang))
+
+class PhotoDrunk(Drunk):
+    def takeStep(self):
+        stepChoices =\
+                    [(0.0, 0.5),(0.0, -0.5),
+                     (1.5, 0.0),(-1.5, 0.0)]
+        return random.choice(stepChoices)
+
+class DDrunk(Drunk):
+    def takeStep(self):
+        stepChoices =\
+                    [(0.85, 0.85), (-0.85, -0.85),
+                     (-0.56, 0.56), (0.56, -0.56)] 
         return random.choice(stepChoices)
 
 def walk(f, d, numSteps):
@@ -119,12 +146,6 @@ def drunkTest(walkLengths, numTrials, dClass):
         
 #random.seed(0)
 #drunkTest((10, 100, 1000, 10000), 100, UsualDrunk)
-
-class ColdDrunk(Drunk):
-    def takeStep(self):
-        stepChoices = [(0.0,0.9), (0.0,-1.1),
-                       (1.0, 0.0), (-1.0, 0.0)]
-        return random.choice(stepChoices)
 
 def simAll(drunkKinds, walkLengths, numTrials):
     for dClass in drunkKinds:
@@ -187,6 +208,46 @@ def getFinalLocs(numSteps, numTrials, dClass):
         locs.append(f.getLoc(d))
     return locs
 
+
+def walkVector(f, d, numSteps):
+    start = f.getLoc(d)
+    for s in range(numSteps):
+        f.moveDrunk(d)
+    return(f.getLoc(d).getX() - start.getX(),
+           f.getLoc(d).getY() - start.getY())
+
+def plotDistance(dClass, numSteps, numTrials):
+    xVals, yVals = [], []
+    for trial in range(numTrials):
+        f = Field()
+        d = dClass()
+        f.addDrunk(d, Location(0, 0))
+        dist = walkVector(f,d,numSteps)
+        xVals.append(dist[0])
+        yVals.append(dist[1])
+    xVals = pylab.array(xVals)
+    yVals = pylab.array(yVals)
+    meanX = sum(abs(xVals))/len(xVals)
+    meanY = sum(abs(yVals))/len(yVals)
+    pylab.plot(xVals, yVals, 'k+',
+               label = dClass.__name__ +\
+                  ' mean abs dist = <'
+                  + str(meanX) + ', ' + str(meanY) + '>')
+    pylab.title('Distance at End of Walks ('
+                + str(numSteps) + ' steps)')
+    pylab.ylim(-100, 100)
+    pylab.xlim(-100, 100)
+    pylab.xlabel('Distance East/West')
+    pylab.ylabel('Distance North/South')
+    pylab.legend(loc = 'upper left')
+
+random.seed(0)
+#plotDistance(UsualDrunk, 1000, 1000)
+#plotDistance(ColdDrunk, 1000, 1000)
+#plotDistance(EDrunk, 1000, 1000)
+#plotDistance(PhotoDrunk, 1000, 1000)
+plotDistance(DDrunk, 1000, 1000)
+
 def plotLocs(drunkKinds, numSteps, numTrials):
     styleChoice = styleIterator(('k+', 'r^', 'mo'))
     for dClass in drunkKinds:
@@ -212,8 +273,8 @@ def plotLocs(drunkKinds, numSteps, numTrials):
     pylab.ylabel('Steps North/South of Origin')
     pylab.legend(loc = 'upper left')
 
-random.seed(0)
-plotLocs((UsualDrunk, ColdDrunk), 10000, 1000)
+#random.seed(0)
+#plotLocs((UsualDrunk, ColdDrunk), 10000, 1000)
 
 class OddField(Field):
     def __init__(self, numHoles = 1000,
@@ -234,6 +295,7 @@ class OddField(Field):
         y = self.drunks[drunk].getY()
         if (x, y) in self.wormholes:
             self.drunks[drunk] = self.wormholes[(x, y)]
+            
             
 #TraceWalk using oddField          
 def traceWalk(fieldKinds, numSteps):
