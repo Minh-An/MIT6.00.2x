@@ -21,9 +21,9 @@ def rabbitGrowth():
     # you need this line for modifying global variables
     global CURRENTRABBITPOP
 
-    
+    RabbitCopy = CURRENTRABBITPOP
     rabbitReproduction = 1.0 - (float(CURRENTRABBITPOP)/MAXRABBITPOP)
-    for i in range(CURRENTRABBITPOP):
+    for i in range(RabbitCopy):
         if random.random() <= rabbitReproduction:
             CURRENTRABBITPOP += 1
         
@@ -48,14 +48,16 @@ def foxGrowth():
     global CURRENTRABBITPOP
     global CURRENTFOXPOP
     
-    for i in range(CURRENTFOXPOP):
+    FoxCopy = CURRENTFOXPOP
+    
+    for i in range(FoxCopy):
         if CURRENTRABBITPOP > 10:
             foxEatsRabbit = float(CURRENTRABBITPOP)/MAXRABBITPOP
             if random.random() <= foxEatsRabbit:
                 CURRENTRABBITPOP -= 1
                 if random.random() <= (1.0/3):
                     CURRENTFOXPOP += 1
-            if random.random() <= (9.0/10):
+            if random.random() <= (1.0/10):
                 CURRENTFOXPOP -= 1
         
             
